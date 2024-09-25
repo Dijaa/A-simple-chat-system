@@ -3,13 +3,14 @@
 Este é um protótipo de um chat simples utilizando Node.js, Express e Socket.IO.
 
 ## Estrutura do Projeto
+``` 
 chatbot/
 ├── index.js 
 ├── package.json 
 ├── public/ 
 │   └── index.html 
 └── readme.md
-
+```
 ## Pré-requisitos
 
 - Node.js
