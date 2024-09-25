@@ -14,15 +14,25 @@ server.listen(3000, () => {
 });
 
 io.on("connection", (socket) => {
-    console.log("a user connected");
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-    });
-});
+    isFirstUser = true;
+    if (isFirstUser) {
+        socket.emit("first user", true);
+        isFirstUser = false;
 
-io.on("connection", (socket) => {
+        socket.on("set preference", (preference) => {
+            showUserName = preference;
+        });
+    }
+
     socket.on("chat message", (msg) => {
+        if (!showUserName) {
+            msg = msg.replace(/^[^:]+: /, ''); // Remove o nome do usuário
+        }
         io.emit("chat message", msg);
         console.log("message: " + msg);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("user disconnected");
     });
 });

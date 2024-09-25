@@ -66,19 +66,19 @@
     <form id="form" action=""><input id="input" autocomplete="off" /><button>Send</button></form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        let user = prompt('enter your name');
-        if (!user) {
-            // dont longer continue
-            window.location.href = '/';
-        }
-
-
-
         var socket = io();
 
         var messages = document.getElementById("messages");
         var form = document.getElementById("form");
         var input = document.getElementById("input");
+
+        socket.on("first user", function (isFirstUser) {
+            
+            if (isFirstUser) {
+                var preference = confirm("Você quer que apareça o nome do usuário nas mensagens?");
+                socket.emit("set preference", preference);
+            }
+        });
 
         form.addEventListener("submit", function (e) {
             e.preventDefault();
@@ -95,8 +95,6 @@
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
-
-
     </script>
 </body>
 
