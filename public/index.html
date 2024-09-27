@@ -73,20 +73,30 @@
         var input = document.getElementById("input");
 
         socket.on("first user", function (isFirstUser) {
-            
+            console.log(isFirstUser);
             if (isFirstUser) {
                 var preference = confirm("Você quer que apareça o nome do usuário nas mensagens?");
                 socket.emit("set preference", preference);
             }
         });
 
+        socket.on("update preference", function (preference) {
+            window.showUserName = preference;
+        });
+
+        var user = prompt("Qual é o seu nome?");
         form.addEventListener("submit", function (e) {
             e.preventDefault();
+            console.log(input.value);
             if (input.value) {
-                let message = user + ': ' + input.value;
+                let message = window.showUserName ? user + ': ' + input.value : input.value;
                 socket.emit("chat message", message);
                 input.value = "";
             }
+        });
+
+        socket.on("set preference", function (preference) {
+            socket.broadcast.emit("update preference", preference);
         });
 
         socket.on("chat message", function (msg) {
