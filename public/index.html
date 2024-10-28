@@ -90,7 +90,7 @@
 
             var socket = io();
 
-            socket.emit("join room", room);
+            socket.emit("join room", { room: room, user: user });
 
             var messages = document.getElementById("messages");
             var form = document.getElementById("form");
