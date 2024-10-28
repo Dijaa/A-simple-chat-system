@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
     socket.on('join room', (room) => {
         socket.join(room);
         console.log(`Usuário entrou na sala: ${room}`);
-
+        io.to(room).emit('chat message', 'Usuário entrou na sala');
         socket.on("chat message", (data) => {
             io.to(data.room).emit("chat message", data.message);
             console.log(`Mensagem para ${data.room}: ${data.message}`);
@@ -30,6 +30,7 @@ io.on("connection", (socket) => {
 
         socket.on("disconnect", () => {
             console.log("Usuário desconectado");
+            io.to(room).emit('chat message', 'Usuário saiu da sala');
             socket.leave(room);
         });
     });
