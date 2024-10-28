@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <style>
+        /* Estilos gerais */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 400px;
+            margin: 80px auto;
+            background-color: #fff;
+            padding: 40px 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        h3 {
+            margin-top: 30px;
+            color: #555;
+        }
+
+        /* Estilo dos inputs */
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0 20px 0;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* Estilo dos botões */
+        button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilo das checkboxes */
+        .checkbox-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .checkbox-container label {
+            font-size: 15px;
+            color: #333;
+        }
+
+        /* Mensagens de alerta */
+        .alert {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        /* Seções ocultas */
+        #rules-section, #nickname-section, #join-button {
+            display: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 480px) {
+            .container {
+                margin: 40px 20px;
+                padding: 30px 20px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            button {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Entrar no Chat</h2>
+    <input type="text" name="room" id="room" placeholder="Nome da sala" />
+    <button onclick="checkRoom()">Entrar</button>
+
+    <div id="rules-section" style="display: none;">
+        <h3>Definir Regras da Sala</h3>
+        <div>
+            <input type="checkbox" id="require_nickname" name="require_nickname">
+            <label for="require_nickname">Usar nickname na sala</label>
+        </div>
+        <!-- Você pode adicionar mais regras pré-definidas aqui -->
+        <button onclick="createRoom()">Criar Sala</button>
+    </div>
+
+    <div id="nickname-section" style="display: none;">
+        <input type="text" name="nickname" id="nickname" placeholder="Digite seu nickname" />
+    </div>
+
+    <button id="join-button" style="display: none;" onclick="joinRoom()">Entrar na Sala</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function checkRoom() {
+            const roomName = document.getElementById("room").value.trim();
+            if (roomName === "") {
+                alert("Por favor, insira o nome da sala.");
+                return;
+            }
+            socket.emit('check room', roomName);
+        }
+
+        socket.on('room exists', (data) => {
+            if (data.exists) {
+                // Sala existe, verificar regras
+                if (data.rules.require_nickname) {
+                    // Sala requer nickname
+                    document.getElementById("nickname-section").style.display = "block";
+                }
+                document.getElementById("join-button").style.display = "block";
+            } else {
+                // Sala não existe, permitir criação com regras
+                document.getElementById("rules-section").style.display = "block";
+            }
+        });
+
+        function createRoom() {
+            const roomName = document.getElementById("room").value.trim();
+            const requireNickname = document.getElementById("require_nickname").checked;
+            const rules = {
+                require_nickname: requireNickname,
+                // Adicione outras regras aqui
+            };
+            socket.emit('create room', { room: roomName, rules: rules });
+            if (requireNickname) {
+                document.getElementById("nickname-section").style.display = "block";
+            }
+            document.getElementById("join-button").style.display = "block";
+            document.getElementById("rules-section").style.display = "none";
+        }
+
+        function joinRoom() {
+            const roomName = document.getElementById("room").value.trim();
+            const nicknameSection = document.getElementById("nickname-section");
+            const nicknameInput = document.getElementById("nickname");
+            let nickname = '';
+            if (nicknameSection.style.display !== 'none') {
+                nickname = nicknameInput.value.trim();
+                if (nickname === "") {
+                    alert("Por favor, insira um nickname.");
+                    return;
+                }
+            }
+            // Redirecionar para chat.html com os parâmetros da sala e nickname
+            let url = `/chat.html?room=${encodeURIComponent(roomName)}`;
+            if (nickname !== '') {
+                url += `&nickname=${encodeURIComponent(nickname)}`;
+            }
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

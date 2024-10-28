@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat com Salas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            margin: 0;
+            padding-bottom: 3rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            background-color: #f0f2f5;
+        }
+
+        #form {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: auto;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        #input {
+            border: none;
+            padding: 0.5rem 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+            min-width: 0;
+            background-color: #fff;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+            border: 1px solid rgba(81, 203, 238, 1);
+        }
+
+        #form > button {
+            background: #4CAF50;
+            border: none;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border-radius: 2rem;
+            outline: none;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #form > button:hover {
+            background: #45a049;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 1rem;
+            max-height: calc(100vh - 6rem);
+            overflow-y: auto;
+            background-color: #fff;
+        }
+
+        #messages > li {
+            padding: 0.5rem 1rem;
+            word-wrap: break-word;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+        }
+
+        #messages > li:nth-child(odd) {
+            background: #e2e2e2;
+        }
+
+        #messages > li:nth-child(even) {
+            background: #d1d1d1;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Digite sua mensagem..." />
+        <button>Enviar</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const vars = queryString.split("&");
+            for (let i = 0; i < vars.length; i++) {
+                const pair = vars[i].split("=");
+                params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            return params;
+        }
+
+        const params = getQueryParams();
+        let user = params.nickname || "";
+        const room = params.room;
+        if (!room) {
+            alert("Sala não especificada.");
+            window.location.href = "/";
+        }
+
+        var socket = io();
+
+        socket.emit("join room", { room: room, user: user });
+
+        var messages = document.getElementById("messages");
+        var form = document.getElementById("form");
+        var input = document.getElementById("input");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit("chat message", input.value);
+                input.value = "";
+            }
+        });
+
+        socket.on("chat message", function (msg) {
+            var item = document.createElement("li");
+            item.textContent = msg;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        socket.on("error", (msg) => {
+            alert(msg);
+            window.location.href = "/";
+        });
+    </script>
+</body>
+</html>
