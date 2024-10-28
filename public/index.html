@@ -1,112 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            padding-bottom: 3rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            box-sizing: border-box;
-        }
-
-        #form {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 0.5rem;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            height: auto;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        #input {
-            border: none;
-            padding: 0.5rem 1rem;
-            flex-grow: 1;
-            border-radius: 2rem;
-            margin: 0.25rem;
-            min-width: 0;
-        }
-
-        #input:focus {
-            outline: none;
-        }
-
-        #form>button {
-            background: #333;
-            border: none;
-            padding: 0.5rem 1rem;
-            margin: 0.25rem;
-            border-radius: 3px;
-            outline: none;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        #messages {
-            list-style-type: none;
-            margin: 0;
-            padding: 1rem;
-            max-height: calc(100vh - 6rem);
-            overflow-y: auto;
-        }
-
-        #messages>li {
-            padding: 0.5rem 1rem;
-            word-wrap: break-word;
-        }
-
-        #messages>li:nth-child(odd) {
-            background: #efefef;
-        }
-    </style>
-</head>
-
-<body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-        <input id="input" autocomplete="off" />
-        <button>Enviar</button>
-    </form>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        let user = prompt('Digite seu nome');
-        if (!user) {
-            // não continuar
-            window.location.href = '/';
-        }
-
-        var socket = io();
-
-        var messages = document.getElementById("messages");
-        var form = document.getElementById("form");
-        var input = document.getElementById("input");
-
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            if (input.value) {
-                let message = user + ': ' + input.value;
-                socket.emit("chat message", message);
-                input.value = "";
+    <head>
+        <meta charset="UTF-8" />
+        <title>Chat com Salas</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {
+                margin: 0;
+                padding-bottom: 3rem;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                box-sizing: border-box;
             }
-        });
 
-        socket.on("chat message", function (msg) {
-            var item = document.createElement("li");
-            item.textContent = msg;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight;
-        });
-    </script>
-</body>
+            #form {
+                background: rgba(0, 0, 0, 0.15);
+                padding: 0.5rem;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                display: flex;
+                height: auto;
+                box-sizing: border-box;
+                backdrop-filter: blur(10px);
+                flex-wrap: wrap;
+                align-items: center;
+            }
 
+            #input {
+                border: none;
+                padding: 0.5rem 1rem;
+                flex-grow: 1;
+                border-radius: 2rem;
+                margin: 0.25rem;
+                min-width: 0;
+            }
+
+            #input:focus {
+                outline: none;
+            }
+
+            #form > button {
+                background: #333;
+                border: none;
+                padding: 0.5rem 1rem;
+                margin: 0.25rem;
+                border-radius: 3px;
+                outline: none;
+                color: #fff;
+                cursor: pointer;
+            }
+
+            #messages {
+                list-style-type: none;
+                margin: 0;
+                padding: 1rem;
+                max-height: calc(100vh - 6rem);
+                overflow-y: auto;
+            }
+
+            #messages > li {
+                padding: 0.5rem 1rem;
+                word-wrap: break-word;
+            }
+
+            #messages > li:nth-child(odd) {
+                background: #efefef;
+            }
+        </style>
+    </head>
+
+    <body>
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" />
+            <button>Enviar</button>
+        </form>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            let user = prompt("Digite seu nome:");
+            if (!user) {
+                window.location.href = "/";
+            }
+
+            let room = prompt("Digite o nome da sala que deseja entrar ou criar:");
+            if (!room) {
+                window.location.href = "/";
+            }
+
+            var socket = io();
+
+            socket.emit("join room", room);
+
+            var messages = document.getElementById("messages");
+            var form = document.getElementById("form");
+            var input = document.getElementById("input");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                if (input.value) {
+                    let message = `${user}: ${input.value}`;
+                    socket.emit("chat message", { room: room, message: message });
+                    input.value = "";
+                }
+            });
+
+            socket.on("chat message", function (msg) {
+                var item = document.createElement("li");
+                item.textContent = msg;
+                messages.appendChild(item);
+                messages.scrollTop = messages.scrollHeight;
+            });
+        </script>
+    </body>
 </html>
