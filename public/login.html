@@ -14,6 +14,7 @@
 
         /* Container principal */
         .container {
+            width: 90%;
             max-width: 400px;
             margin: 80px auto;
             background-color: #fff;
@@ -93,9 +94,9 @@
         }
 
         /* Responsividade */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .container {
-                margin: 40px 20px;
+                margin: 60px auto;
                 padding: 30px 20px;
             }
 
@@ -108,28 +109,46 @@
                 font-size: 15px;
             }
         }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 40px auto;
+                padding: 20px 15px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>Entrar no Chat</h2>
-    <input type="text" name="room" id="room" placeholder="Nome da sala" />
-    <button onclick="checkRoom()">Entrar</button>
+    <div class="container">
+        <h2>Entrar no Chat</h2>
+        <input type="text" name="room" id="room" placeholder="Nome da sala" />
+        <button onclick="checkRoom()">Entrar</button>
 
-    <div id="rules-section" style="display: none;">
-        <h3>Definir Regras da Sala</h3>
-        <div>
-            <input type="checkbox" id="require_nickname" name="require_nickname">
-            <label for="require_nickname">Usar nickname na sala</label>
+        <div id="rules-section">
+            <h3>Definir Regras da Sala</h3>
+            <div class="checkbox-container">
+                <input type="checkbox" id="require_nickname" name="require_nickname">
+                <label for="require_nickname">Usar nickname na sala</label>
+            </div>
+            <!-- Você pode adicionar mais regras pré-definidas aqui -->
+            <button onclick="createRoom()">Criar Sala</button>
         </div>
-        <!-- Você pode adicionar mais regras pré-definidas aqui -->
-        <button onclick="createRoom()">Criar Sala</button>
-    </div>
 
-    <div id="nickname-section" style="display: none;">
-        <input type="text" name="nickname" id="nickname" placeholder="Digite seu nickname" />
-    </div>
+        <div id="nickname-section">
+            <input type="text" name="nickname" id="nickname" placeholder="Digite seu nickname" />
+        </div>
 
-    <button id="join-button" style="display: none;" onclick="joinRoom()">Entrar na Sala</button>
+        <button id="join-button" onclick="joinRoom()">Entrar na Sala</button>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
